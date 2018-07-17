@@ -5,7 +5,7 @@ const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017';
 
 // 
-const dbName = 'SZHM19';
+const dbName = 'run';
 
 
 
@@ -24,6 +24,7 @@ module.exports = {
         MongoClient.connect(url, function (err, client) {
             // 使用某个库
             const db = client.db(dbName);
+            // console.log(db);
             // 查询逻辑
             db.collection(collectionName).find(query).toArray((err,docs)=>{
                 // 增 删 改 查

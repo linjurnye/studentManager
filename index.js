@@ -4,13 +4,8 @@ let svgCaptcha = require("svg-captcha");
 let path = require("path");
 var session = require('express-session');
 var bodyParser = require('body-parser');
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
-// Connection URL
-const url = 'mongodb://localhost:27017';
+let myt = require(path.join(__dirname,"tools/myT"))
 
-// Database Name
-const dbName = 'run';
 //创建app
 let app = express();
 
@@ -82,38 +77,46 @@ app.post('/register', (req, res) => {
     // 获取用户数据
     let userName = req.body.userName;
     let userPass = req.body.userPass;
-    console.log(userName);
-    console.log(userPass);
+    myt.find("userList",{userName},(err,docs)=>{
+        if(docs.length == 0){
+            // 可以注册
+            myt.insert("userList",{ userName,userPass},(err,result)=>{
+                if(!err)myt.mess(res,"欢迎加入","/login");
+            })
+        }else{
+            // 不可注册
+            myt.mess(res,"已注册","/register")
+        }
+    })
+    // MongoClient.connect(url,  (err, client)=>{
+    //     // 连上mongo之后 选择使用的库
+    //     const db = client.db(dbName);
+    //     // 选择使用的集合
+    //     let collection = db.collection('userList');
 
-    MongoClient.connect(url,  (err, client)=>{
-        // 连上mongo之后 选择使用的库
-        const db = client.db(dbName);
-        // 选择使用的集合
-        let collection = db.collection('userList');
-
-        // 查询数据
-        collection.find({
-            userName
-        }).toArray((err,doc)=>{
-            console.log(doc);
-            if(doc.length==0){
-                // 没有人
-                // 新增数据
-                collection.insertOne({
-                    userName,
-                    userPass
-                },(err,result)=>{
-                    console.log(err);
-                    // 注册成功了
-                    res.setHeader('content-type','text/html');
-                    res.send("<script>alert('欢迎入坑');window.location='/login'</script>")
-                    // 关闭数据库连接即可
-                    client.close();
-                })
-            }
-        })
+    //     // 查询数据
+    //     collection.find({
+    //         userName
+    //     }).toArray((err,doc)=>{
+    //         console.log(doc);
+    //         if(doc.length==0){
+    //             // 没有人
+    //             // 新增数据
+    //             collection.insertOne({
+    //                 userName,
+    //                 userPass
+    //             },(err,result)=>{
+    //                 console.log(err);
+    //                 // 注册成功了
+    //                 res.setHeader('content-type','text/html');
+    //                 res.send("<script>alert('欢迎入坑');window.location='/login'</script>")
+    //                 // 关闭数据库连接即可
+    //                 client.close();
+    //             })
+    //         }
+    //     })
         
-    });
+    // });
 })
 //开启监听
 app.listen(8090, "127.0.0.1", () => {
